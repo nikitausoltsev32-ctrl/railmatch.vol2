@@ -171,6 +171,9 @@ export type Request = Database['public']['Tables']['requests']['Row']
 export type Bid = Database['public']['Tables']['bids']['Row']
 export type Message = Database['public']['Tables']['messages']['Row']
 
+// User role type
+export type UserRole = 'shipper' | 'carrier' | 'admin'
+
 export type RequestWithShipper = Request & {
   profiles: Profile
 }
