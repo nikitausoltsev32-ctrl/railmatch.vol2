@@ -22,6 +22,7 @@ export default function RootLayout({
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
+import { AuthProvider } from '@/components/auth/AuthProvider';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -34,9 +35,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'B2B платформа | Промышленное решение',
-  description: 'Современная платформа для B2B взаимодействия с промышленным подходом',
-  keywords: ['B2B', 'платформа', 'промышленное', 'решение'],
+  title: 'RailMatch Vol. 2',
+  description: 'Логистическая платформа, соединяющая грузоотправителей и перевозчиков для железнодорожных перевозок',
 };
 
 export default function RootLayout({
@@ -46,7 +46,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   );
 }
