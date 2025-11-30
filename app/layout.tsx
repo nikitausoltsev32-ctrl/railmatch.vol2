@@ -13,9 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'B2B платформа | Промышленное решение',
-  description: 'Современная платформа для B2B взаимодействия с промышленным подходом',
-  keywords: ['B2B', 'платформа', 'промышленное', 'решение'],
+  title: 'RailMatch Vol. 2',
+  description: 'Логистическая платформа, соединяющая грузоотправителей и перевозчиков для железнодорожных перевозок',
 };
 
 export default function RootLayout({

@@ -1,191 +1,184 @@
-# B2B Platform - Next.js 15 with TypeScript & Tailwind CSS
+# RailMatch Vol. 2
 
-A modern, scalable B2B platform built with Next.js 15, TypeScript, Tailwind CSS, and industrial design principles.
+Логистическая платформа, соединяющая грузоотправителей и перевозчиков для железнодорожных перевозок, построенная на Supabase и современных веб-технологиях.
 
-## Features
+## Обзор
 
-- **Next.js 15 App Router** - Latest Next.js version with App Router
-- **TypeScript** - Full type safety and better developer experience
-- **Tailwind CSS 4** - Utility-first CSS framework with industrial theme
-- **Lucide React** - Beautiful, consistent icon library
-- **ESLint & Prettier** - Code quality and formatting
-- **Russian Language Support** - Full Cyrillic font support
-- **Dark Mode** - Built-in dark mode support
-- **Responsive Design** - Mobile-first approach
-- **Industrial B2B Design** - Professional, modern aesthetic
+RailMatch - это B2B платформа, которая способствует соединению компаний, нуждающихся в перевозке грузов по железной дороге (грузоотправители), с поставщиками железнодорожных перевозок (перевозчики). Платформа позволяет грузоотправителям размещать заявки на перевозку грузов, а перевозчикам - подавать конкурентные предложения.
 
-## Project Structure
+## Технологический стек
 
-```
-├── app/
-│   ├── layout.tsx          # Root layout with metadata
-│   ├── page.tsx            # Home page
-│   └── globals.css         # Global styles and theme
-├── components/
-│   ├── Navigation.tsx      # Top navigation with mobile menu
-│   ├── Hero.tsx           # Hero section with role-based CTAs
-│   └── Footer.tsx         # Footer with links
-├── lib/                   # Utility functions and helpers
-├── public/                # Static assets
-├── .env.example           # Environment variables template
-├── tailwind.config.ts     # Tailwind CSS configuration
-├── .prettierrc.json       # Prettier configuration
-└── package.json           # Project dependencies and scripts
-```
+- **База данных**: Supabase (PostgreSQL с возможностями реального времени)
+- **Бэкенд**: Supabase (Аутентификация, База данных, Хранилище)
+- **Фронтенд**: Next.js 16 с TypeScript
+- **Язык**: TypeScript
+- **Стили**: Tailwind CSS 4
+- **Иконки**: Lucide React
+- **Форматирование**: ESLint & Prettier
 
-## Getting Started
+## Структура базы данных
 
-### Prerequisites
+### Основные таблицы
 
-- Node.js 18.17 or later
-- npm or yarn
+#### `profiles`
+Пользовательские профили с контролем доступа на основе ролей.
+- **Колонки**: `id`, `email`, `full_name`, `role`, `company_name`, `phone`, временные метки
+- **Роли**: `shipper` (Заказчик), `carrier` (Исполнитель), `admin`
+- **Доступ**: Пользователи могут просматривать/редактировать только свой профиль; администраторы могут просматривать все
 
-### Installation
+#### `requests`
+Заявки на перевозку грузов, размещаемые грузоотправителями.
+- **Колонки**: `id`, `shipper_id`, `route_from`, `route_to`, `cargo_description`, `cargo_weight`, `wagon_type`, `wagon_count`, `loading_date`, `unloading_date`, `target_price`, `status`, `additional_requirements`, временные метки
+- **Статусы**: `open`, `in_progress`, `completed`, `cancelled`
+- **Доступ**: Публичный доступ на чтение, грузоотправители могут создавать/обновлять свои заявки
 
-1. Clone the repository
-2. Install dependencies:
+#### `bids`
+Конкурентные предложения, подаваемые перевозчиками на конкретные заявки.
+- **Колонки**: `id`, `request_id`, `owner_id`, `amount`, `notes`, `status`, `valid_until`, временные метки
+- **Статусы**: `pending`, `accepted`, `rejected`, `withdrawn`
+- **Доступ**: Пользователи могут видеть свои предложения и предложения на своих заявках; перевозчики могут создавать предложения, грузоотправители могут принимать/отклонять
+
+#### `messages`
+Общение между пользователями, связанное с предложениями и заявками.
+- **Колонки**: `id`, `bid_id`, `request_id`, `sender_id`, `body`, `read_at`, временные метки
+- **Доступ**: Пользователи могут видеть только сообщения, которые они отправили или получили (участники предложений или владелец заявки)
+
+## Начало работы
+
+### Предварительные требования
+
+- Node.js 18+ и npm/yarn
+- Аккаунт Supabase и проект
+- Git
+
+### Установка
+
+1. **Клонирование репозитория**
+   ```bash
+   git clone <repository-url>
+   cd railmatch.vol2
+   ```
+
+2. **Установка зависимостей**
+   ```bash
+   npm install
+   ```
+
+3. **Настройка переменных окружения**
+   ```bash
+   cp .env.example .env.local
+   ```
+   Обновите `.env.local` с вашими учетными данными проекта Supabase:
+   - `NEXT_PUBLIC_SUPABASE_URL`: URL вашего проекта Supabase
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Ваш анонимный ключ Supabase
+
+4. **Настройка базы данных**
+   
+   Если вы начинаете с нуля:
+   ```bash
+   # Отправить начальную схему в ваш проект Supabase
+   npm run db:push
+   ```
+   
+   Или если вам нужно сбросить:
+   ```bash
+   npm run db:reset
+   ```
+
+5. **Генерация TypeScript типов**
+   ```bash
+   npm run db:generate-types
+   ```
+
+### Разработка
 
 ```bash
-npm install
-# or
-yarn install
-```
-
-3. Create `.env.local` from `.env.example`:
-
-```bash
-cp .env.example .env.local
-```
-
-4. Add your Supabase credentials to `.env.local`:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_public_key
-```
-
-### Development
-
-Start the development server:
-
-```bash
+# Запустить сервер разработки
 npm run dev
-# or
-yarn dev
+
+# Проверка типов
+npm run type-check
+
+# Линтинг
+npm run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Управление базой данных
 
-## Available Scripts
+### Команды миграции
 
-### `npm run dev`
+```bash
+# Отправить локальные изменения в удаленную базу данных
+npm run db:push
 
-Runs the development server on [http://localhost:3000](http://localhost:3000)
+# Сбросить базу данных для соответствия локальной схеме
+npm run db:reset
 
-### `npm run build`
+# Показать различия между локальной и удаленной
+npm run db:diff
 
-Builds the application for production in the `.next` folder
+# Сгенерировать TypeScript типы из схемы базы данных
+npm run db:generate-types
+```
 
-### `npm run start`
+### Изменения схемы
 
-Starts the production server
+1. Создайте новые файлы миграции в `supabase/migrations/`
+2. Используйте соглашение об именовании с временной меткой: `YYYYMMDDHHMMSS_description.sql`
+3. Протестируйте локально с `npm run db:diff`
+4. Примените изменения с `npm run db:push`
 
-### `npm run lint`
+## Структура проекта
 
-Runs ESLint to check for code quality issues
+```
+railmatch.vol2/
+├── app/
+│   ├── auth/                 # Страницы аутентификации
+│   ├── dashboard/            # Защищенные дашборды
+│   ├── layout.tsx           # Корневой layout
+│   ├── page.tsx             # Главная страница
+│   └── globals.css          # Глобальные стили
+├── components/
+│   ├── auth/                # Компоненты аутентификации
+│   ├── ui/                  # Базовые UI компоненты
+│   ├── Navigation.tsx       # Навигация
+│   ├── Hero.tsx            # Hero секция
+│   └── Footer.tsx          # Footer
+├── lib/
+│   ├── supabase.ts          # Supabase клиент и типы
+│   ├── auth.ts              # Хелперы аутентификации
+│   └── database.types.ts    # Сгенерированные TypeScript типы
+├── supabase/
+│   ├── migrations/          # Файлы миграций базы данных
+│   └── config.json          # Конфигурация Supabase
+├── middleware.ts            # Middleware для защиты маршрутов
+└── .env.example             # Шаблон переменных окружения
+```
 
-### `npm run lint:fix`
+## Ключевые функции
 
-Automatically fixes ESLint issues
+### Для Грузоотправителей (Заказчиков)
+- Размещение заявок на перевозку грузов с детальными спецификациями
+- Просмотр и сравнение конкурентных предложений от перевозчиков
+- Прямая коммуникация с перевозчиками через сообщения
+- Отслеживание статуса заявки от открытой до завершенной
 
-### `npm run format`
+### для Перевозчиков (Исполнителей)
+- Просмотр доступных заявок на перевозку грузов в реальном времени
+- Подача конкурентных предложений с детальными предложениями
+- Общение с грузоотправителями для уточнения требований
+- Управление статусом предложений и отслеживание принятых контрактов
 
-Formats code with Prettier
+### для Администраторов Платформы
+- Управление пользователями и назначение ролей
+- Мониторинг активности платформы и транзакций
+- Разрешение споров и предоставление поддержки
+- Доступ к комплексной аналитике и отчетности
 
-### `npm run format:check`
+## Соображения безопасности
 
-Checks if code is formatted correctly
-
-## Tailwind CSS Theme
-
-The theme includes:
-
-- **Color Palette**: Industrial slate, steel, and professional blue tones
-- **Dark Mode**: Full dark mode support with CSS variables
-- **Typography**: Modern font weights and sizes
-- **Spacing**: Consistent spacing scale
-- **Shadows**: Professional shadow system
-- **Border Radius**: Balanced radius system
-
-### Color Variables
-
-- `--background` - Main background color
-- `--foreground` - Main text color
-- `--muted-background` - Secondary background
-- `--muted-foreground` - Secondary text
-- `--border` - Border color
-- `--accent-primary` - Primary action color
-- `--accent-success` - Success state
-- `--accent-warning` - Warning state
-- `--accent-error` - Error state
-
-## Components
-
-### Navigation
-
-Responsive navigation with mobile menu. Includes:
-
-- Logo/Brand
-- Navigation links
-- Mobile hamburger menu
-- Dark mode support
-
-### Hero
-
-Landing page hero section featuring:
-
-- Gradient headline
-- Role-based CTA cards (Руководитель, Менеджер, Специалист)
-- Primary call-to-action button
-- Statistics grid
-
-### Footer
-
-Comprehensive footer with:
-
-- Brand information
-- Link sections
-- Social media links
-- Copyright notice
-
-## Styling
-
-All styles use Tailwind CSS with a custom industrial B2B theme. The design system includes:
-
-- Consistent color palette
-- Professional typography
-- Smooth transitions and interactions
-- Responsive breakpoints (sm, md, lg, xl, 2xl)
-- Accessibility considerations
-
-## Environment Variables
-
-See `.env.example` for all required environment variables.
-
-### Supabase Keys
-
-- `NEXT_PUBLIC_SUPABASE_URL` - Your Supabase project URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Public anonymous key for client-side authentication
-- `SUPABASE_SERVICE_ROLE_KEY` - (Optional) Service role key for server-side operations
-
-## Learn More
-
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
-- [TypeScript Documentation](https://www.typescriptlang.org/docs)
-- [Lucide Icons](https://lucide.dev)
-- [Supabase Documentation](https://supabase.com/docs)
-
-## License
-
-MIT
+- **Row Level Security**: Весь доступ к базе данных контролируется политиками RLS
+- **Аутентификация**: Supabase Auth безопасно обрабатывает аутентификацию пользователей
+- **Валидация входных данных**: Ограничения базы данных и валидация на уровне приложения
+- **Конфиденциальность**: Приватные данные (предложения, сообщения) доступны только авторизованным участникам
+- **Аудит**: Автоматические временные метки отслеживают все изменения данных
