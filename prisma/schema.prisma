@@ -1,0 +1,138 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      UserRole @default(EXECUTOR)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Requests created by this user
+  requests Request[]
+  
+  // Bids made by this user
+  bids Bid[]
+  
+  // Messages sent by this user
+  messages Message[]
+  
+  // Chat participations
+  chatParticipants ChatParticipant[]
+}
+
+model Request {
+  id          String     @id @default(cuid())
+  title       String
+  description String
+  wagonType   String
+  origin      String
+  destination String
+  date        DateTime
+  status      RequestStatus @default(OPEN)
+  createdBy   String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  creator User  @relation(fields: [createdBy], references: [id])
+  bids    Bid[]
+  chats   Chat[]
+
+  @@map("requests")
+}
+
+model Bid {
+  id          String   @id @default(cuid())
+  amount      Float
+  message     String?
+  status      BidStatus @default(PENDING)
+  requestId   String
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  request   Request @relation(fields: [requestId], references: [id])
+  createdBy User    @relation(fields: [createdById], references: [id])
+  chat      Chat?
+
+  @@unique([requestId, createdById])
+  @@map("bids")
+}
+
+model Chat {
+  id        String   @id @default(cuid())
+  bidId     String?  @unique
+  requestId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bid     Bid?             @relation(fields: [bidId], references: [id])
+  request Request          @relation(fields: [requestId], references: [id])
+  messages Message[]
+  participants ChatParticipant[]
+
+  @@map("chats")
+}
+
+model ChatParticipant {
+  id     String @id @default(cuid())
+  chatId String
+  userId String
+  lastReadAt DateTime @default(now())
+
+  chat Chat @relation(fields: [chatId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([chatId, userId])
+  @@map("chat_participants")
+}
+
+model Message {
+  id        String      @id @default(cuid())
+  content   String
+  senderId  String
+  chatId    String
+  status    MessageStatus @default(SENT)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  sender User  @relation(fields: [senderId], references: [id])
+  chat   Chat  @relation(fields: [chatId], references: [id])
+
+  @@map("messages")
+}
+
+enum UserRole {
+  OWNER
+  EXECUTOR
+}
+
+enum RequestStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum BidStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+}
